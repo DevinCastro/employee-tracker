@@ -21,16 +21,7 @@ const cTable = require('console.table');
 //   foo   10
 // bar   20
 
-const choicesArray = [
-  'View all employees',
-  'View all employees by department',
-  'View all employees by manager',
-  'Add employee',
-  'Add department',
-  'Remove employee',
-  'Update employee role',
-  'Update employee manager'
-]
+const choicesArray = ['Add employee', 'Add role', 'Add department', 'View employees', 'View roles', 'View departments', 'Update employee roles']
 
 const questions = [
   {
@@ -54,6 +45,7 @@ const viewEmployees = () => {
     `, (err, employees) => {
     if (err) { console.log(err) }
     console.table(employees)
+    mainMenu()
   })
 }
 
@@ -100,14 +92,15 @@ const addEmployee = () => {
             choices: employees
           },
         ])
-         .then(employee => {
-           db.query('INSERT INTO employees SET ?', employee, (err) => {
-             if (err) {console.log(err)}
-             console.log('employee created')
-           })
-         })
-         .catch(err => { console.log(err) })
-        
+        .then(employee => {
+          db.query('INSERT INTO employees SET ?', employee, (err) => {
+            if (err) { console.log(err) }
+            console.log('employee created')
+            mainMenu()
+          })
+        })
+        .catch(err => { console.log(err) })
+
     })
   })
 }
@@ -132,6 +125,119 @@ const addDepartment = () => {
     .catch(err => { console.log(err) })
 }
 
+const viewDepartments = () => {
+  db.query(`
+        SELECT * FROM department
+    `, (err, departments) => {
+    if (err) { console.log(err) }
+    console.table(departments)
+    mainMenu()
+  })
+}
+
+const viewRoles = () => {
+
+  db.query(`
+        SELECT role.id, role.title, role.salary, department.name AS department
+        FROM role
+        LEFT JOIN department
+        ON role.department_id = department.id
+    `, (err, role) => {
+    if (err) { console.log(err) }
+    console.table(role)
+    mainMenu()
+  })
+
+}
+
+const addRole = () => {
+
+  db.query("SELECT * FROM department", (err, departments) => {
+    if (err) { console.log(err) }
+
+    departments = departments.map(department => ({
+      name: department.name,
+      value: department.id
+    }))
+
+    inquirer
+      .prompt([
+        {
+          type: 'input',
+          name: 'title',
+          message: 'What is the role name?'
+        },
+        {
+          type: 'input',
+          name: 'salary',
+          message: 'What is the salary?'
+        },
+        {
+          type: 'list',
+          name: 'department_id',
+          message: 'What is the department?',
+          choices: departments
+        },
+      ])
+      .then(role => {
+        console.log(role)
+        db.query('INSERT INTO role SET ?', role, (err) => {
+          if (err) { console.log(err) }
+          console.log('role created')
+          mainMenu()
+        })
+      })
+      .catch(err => { console.log(err) })
+  })
+
+}
+
+const updateEmployeeRole = () => {
+  db.query('SELECT * FROM employees', (err, employees) => {
+
+    employees = employees.map(employee => ({
+      name: `${employee.first_name} ${employee.last_name}`,
+      value: employee.id
+    }))
+    db.query('SELECT * FROM role', (err, roles) => {
+
+      roles = roles.map(role => ({
+        name: role.title,
+        value: role.id
+      }))
+
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            name: 'employees_id',
+            message: 'Choose an employee to update',
+            choices: employees
+          },
+          {
+            type: 'list',
+            name: 'role_id',
+            message: 'Choose the employee new role',
+            choices: roles
+          },
+        ])
+        .then(employee => {
+          console.log(employee.role_id)
+          db.query('UPDATE employees SET role_id = ? WHERE employees.id = ?', [employee.role_id, employee.employees_id], (err) => {
+            if (err) { console.log(err) }
+            console.log('employee updated')
+            mainMenu()
+          })
+        })
+        .catch(err => { console.log(err) })
+    })
+
+  })
+}
+
+
+
+
 
 
 const mainMenu = () => {
@@ -145,27 +251,28 @@ const mainMenu = () => {
       console.log(res.toDoChoice)
 
       switch (res.toDoChoice) {
-        case 'View all employees':
-          viewEmployees()
-          break;
-        case 'View all employees by department':
-          
-          break;
-        case 'Add department':
-          addDepartment()
-          break;
         case 'Add employee':
           addEmployee()
-          break;
-        case 'Remove employee':
+          break
+        case 'Add role':
+          addRole()
+          break
+        case 'Add department':
+          addDepartment()
+          break
+        case 'View employees':
+          viewEmployees()
+          break
+        case 'View roles':
+          viewRoles()
+          break
+        case 'View departments':
+          viewDepartments()
+          break
+        case 'Update employee roles':
+          updateEmployeeRole()
+          break
 
-          break;
-        case 'Update employee role':
-
-          break;
-        case 'Update employee manager':
-
-          break;
       }
 
 

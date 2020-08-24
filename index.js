@@ -21,15 +21,7 @@ const cTable = require('console.table');
 //   foo   10
 // bar   20
 
-const choicesArray = [
-  'View all employees',
-  'View all employees by department',
-  'View all employees by manager',
-  'Add employee',
-  'Remove employee',
-  'Update employee role',
-  'Update employee manager'
-]
+const choicesArray = ['Add employee', 'Add role', 'Add department', 'View employees', 'View roles', 'View departments', 'Update employee roles']
 
 const questions = [
   {
@@ -103,27 +95,28 @@ const mainMenu = () => {
       console.log(res.toDoChoice)
 
       switch (res.toDoChoice) {
-        case 'View all employees':
-          viewEmployees()
-          break;
-        case 'View all employees by department':
-
-          break;
-        case 'View all employees by manager':
-
-          break;
         case 'Add employee':
+          addEmployee()
+          break
+        case 'Add role':
+          addRole()
+          break
+        case 'Add department':
+          addDepartment()
+          break
+        case 'View employees':
+          viewEmployees()
+          break
+        case 'View roles':
+          viewRoles()
+          break
+        case 'View departments':
+          viewDepartments()
+          break
+        case 'Update employee roles':
+          updateEmployeeRole
+          break
 
-          break;
-        case 'Remove employee':
-
-          break;
-        case 'Update employee role':
-
-          break;
-        case 'Update employee manager':
-
-          break;
       }
 
 
