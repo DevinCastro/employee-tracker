@@ -1,6 +1,6 @@
 # employee-tracker
 
-Link to Video: 
+Link to Video: https://youtu.be/L6CJpBu-kro
 
 ## Description:
 >The application allows the user to add employees, departments, and employee roles to a database.  They can also view all employees, departments, and roles.  Lastly the user is able to update any of the employees roles. 
