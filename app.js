@@ -5,8 +5,10 @@ const db = require('./db')
 // call console.table
 const cTable = require('console.table');
 
-const choicesArray = ['Add employee', 'Add role', 'Add department', 'View employees', 'View roles', 'View departments', 'Update employee roles']
+// this array holds the possible choices for the main menu, which will then be the names of all our functions
+const choicesArray = ['Add employee', 'Add role', 'Add department', 'View employees', 'View roles', 'View departments', 'Update employee roles', 'Finish']
 
+// this array holds the question for the main menu
 const questions = [
   {
     type: 'list',
@@ -16,7 +18,9 @@ const questions = [
   },
 ]
 
+// the following are all the functions for each choice the user decides to make
 const viewEmployees = () => {
+  // this is the most complex query that returns up all the employees with their, id,first name, last name, role title, role salary, department name, and manager name
   db.query(`
         SELECT employees.id, employees.first_name, employees.last_name, role.title, role.salary, department.name AS department, CONCAT(manager.first_name, ' ', manager.last_name) AS manager 
         FROM employees
@@ -28,6 +32,7 @@ const viewEmployees = () => {
         ON manager.id = employees.manager_id
     `, (err, employees) => {
     if (err) { console.log(err) }
+    // use console table to nicely display the data
     console.table(employees)
     mainMenu()
   })
@@ -36,19 +41,19 @@ const viewEmployees = () => {
 const addEmployee = () => {
   db.query("SELECT * FROM role", (err, roles) => {
     if (err) { console.log(err) }
-
+// this maps the roles array into objects with a name key and a value key, so the user sees the role NAME but we recieve the VALUE of the id
     roles = roles.map(role => ({
       name: role.title,
       value: role.id
     }))
 
     db.query('SELECT * FROM employees', (err, employees) => {
-
+// similarly now we map the employees so we see the name, but recieve the id
       employees = employees.map(employee => ({
         name: `${employee.first_name} ${employee.last_name}`,
         value: employee.id
       }))
-
+// this inserts a none/null employee to the top of the list
       employees.unshift({ name: 'None', value: null })
 
       inquirer
@@ -77,6 +82,7 @@ const addEmployee = () => {
           },
         ])
         .then(employee => {
+          // here we take all the user input and add the employee into the database
           db.query('INSERT INTO employees SET ?', employee, (err) => {
             if (err) { console.log(err) }
             console.log('employee created')
@@ -100,6 +106,7 @@ const addDepartment = () => {
     ])
     .then(department => {
       console.log(department)
+      // here we insert the new department into the department table
       db.query('INSERT INTO department SET ?', department, (err) => {
         if (err) { console.log(err) }
         console.log('department created')
@@ -110,6 +117,7 @@ const addDepartment = () => {
 }
 
 const viewDepartments = () => {
+  // here we query the db to show us the department table
   db.query(`
         SELECT * FROM department
     `, (err, departments) => {
@@ -120,7 +128,7 @@ const viewDepartments = () => {
 }
 
 const viewRoles = () => {
-
+// query the db to give us the role table but we want the department NAME instead of just the department id, so we join the department table where role.department_id = department.id
   db.query(`
         SELECT role.id, role.title, role.salary, department.name AS department
         FROM role
@@ -135,7 +143,7 @@ const viewRoles = () => {
 }
 
 const addRole = () => {
-
+// we need to query the department table first so we can grab the department name instead of just using its id
   db.query("SELECT * FROM department", (err, departments) => {
     if (err) { console.log(err) }
 
@@ -178,13 +186,13 @@ const addRole = () => {
 
 const updateEmployeeRole = () => {
   db.query('SELECT * FROM employees', (err, employees) => {
-
+    // first we grab the employees table so we can display the first and last names but get the value of the employee id
     employees = employees.map(employee => ({
       name: `${employee.first_name} ${employee.last_name}`,
       value: employee.id
     }))
     db.query('SELECT * FROM role', (err, roles) => {
-
+      // now we grab the roles table so we can display the name names but get the value of the role id
       roles = roles.map(role => ({
         name: role.title,
         value: role.id
@@ -207,6 +215,7 @@ const updateEmployeeRole = () => {
         ])
         .then(employee => {
           console.log(employee.role_id)
+          // now we update the employees role
           db.query('UPDATE employees SET role_id = ? WHERE employees.id = ?', [employee.role_id, employee.employees_id], (err) => {
             if (err) { console.log(err) }
             console.log('employee updated')
@@ -255,6 +264,9 @@ const mainMenu = () => {
           break
         case 'Update employee roles':
           updateEmployeeRole()
+          break
+        case 'Finish':
+          console.log('You are all finished! Thank you!')
           break
 
       }
