@@ -1,25 +1,9 @@
 const inquirer = require('inquirer')
-// Import the filsystem framework so we can use the writeFile function
 const fs = require('fs')
 const db = require('./db')
 
-// call once somewhere in the beginning of the app
+// call console.table
 const cTable = require('console.table');
-// console.table([
-//   {
-//     name: 'foo',
-//     age: 10
-//   }, {
-//     name: 'bar',
-//     age: 20
-//   }
-// ]);
-
-// prints
-// name  age
-// ----  ---
-//   foo   10
-// bar   20
 
 const choicesArray = ['Add employee', 'Add role', 'Add department', 'View employees', 'View roles', 'View departments', 'Update employee roles']
 
